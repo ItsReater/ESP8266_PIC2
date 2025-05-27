@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+
+## Python container.
+  pythonapp:
+    restart: unless-stopped
+    build: ./python_image/
+    # Esperar 10 segundos, antes de inicializar el programa.
+    # Así nos aseguramos que la db ha sido inicializada.
+    command: sh -c "sleep 10s ; python3 ./main.py"
+    depends_on:
+      - db
+
+## Mosquitto container.
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    restart: unless-stopped
+    volumes:
+      - ./config:/mosquitto/config
+      - ./data:/mosquitto/data
+      - ./log:/mosquitto/log
+    ports:
+      - 1883:1883
+    stdin_open: true
+    tty: true
+
+## Db container.
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass	 
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data: /var/lib/postgresql/data
+
+volumes:
+  postgres_data:
