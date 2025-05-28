@@ -1,4 +1,11 @@
-FROM python
+FROM python:3.10-slim
+
 WORKDIR /main
-COPY . /main
-CMD [ "python3", "main.py" ]
+
+RUN apt-get update && apt-get install -y libpq-dev gcc && apt-get clean
+
+COPY . .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["python3", "main.py"]
